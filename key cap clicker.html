@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#080d18">
+<link rel="icon" href="./icon.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KEY CAP CLICKER 3.0</title>
+<style>
+*{box-sizing:border-box}
+:root{color-scheme:dark;--bg:#080d18;--panel:#111b2d;--text:#eef5ff;--line:#263954;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;user-select:none;-webkit-user-select:none}
+button{border:0;border-radius:12px;padding:12px 14px;background:#203957;color:#fff;font-weight:bold;cursor:pointer}
+button:active{transform:scale(.96)}button:disabled{opacity:.4}
+button.primary{background:linear-gradient(135deg,#168fff,#635cff)}
+button.gold{background:linear-gradient(135deg,#ff9d1c,#ff4f6b)}
+header{padding:14px;text-align:center;background:#0d1728;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:22px;letter-spacing:2px;color:#58baff}
+header small{color:#849bb8}
+.stats{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:98px;text-align:center;font-size:13px}
+.stat b{display:block;font-size:18px;color:#65c4ff;margin-top:3px}
+main{max-width:900px;margin:auto;padding:12px}
+#clickZone{min-height:290px;border:1px solid var(--line);border-radius:20px;background:radial-gradient(ellipse at center,#1a3150,#0c1424 70%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;cursor:pointer;overflow:hidden;position:relative;touch-action:manipulation}
+#clickZone p{color:#8ea8c9;margin:0;font-size:13px}
+#clickZone h2{margin:0;font-size:18px}
+#combo{font-weight:900;font-size:20px;color:#ffd24a;height:26px;text-shadow:0 0 12px #ff9d1c}
+.fl{position:absolute;pointer-events:none;font-weight:900;font-size:20px;color:#fff;text-shadow:0 2px 6px #000;animation:up .9s ease-out forwards;z-index:5}
+.fl.crit{color:#ffd24a;font-size:30px}
+@keyframes up{to{transform:translateY(-90px);opacity:0}}
+@keyframes shake{25%{transform:translate(-4px,2px)}50%{transform:translate(4px,-3px)}75%{transform:translate(-3px,-2px)}}
+.shake{animation:shake .25s}
+.keycap{--cap:#2379bd;--side:#12436c;--glow:#45baff;position:relative;width:132px;height:115px;filter:drop-shadow(0 13px 8px #0009);transform:perspective(500px) rotateX(9deg);transition:.12s}
+.keycap .base{position:absolute;left:5px;right:5px;top:5px;height:94px;background:var(--side);border-radius:17px;box-shadow:inset 0 -8px 0 #0005}
+.keycap .top{position:absolute;left:9px;right:9px;top:0;height:83px;border-radius:15px;background:var(--cap);border:2px solid #ffffff45;box-shadow:inset 0 3px 5px #ffffff45,inset 0 -8px 12px #0004,0 0 18px var(--glow)}
+.keycap .top:before{content:"";position:absolute;inset:7px;border-radius:10px;border:1px solid #ffffff25}
+.keycap .legend{position:absolute;left:0;right:0;top:0;height:83px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;text-shadow:0 2px 4px #0008;letter-spacing:1px}
+.keycap.big{transform:perspective(500px) rotateX(9deg) scale(1.1);animation:float 2.4s ease-in-out infinite}
+@keyframes float{50%{margin-top:-8px}}
+#clickZone:active .keycap{transform:perspective(500px) rotateX(17deg) scale(.92)}
+.section{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:14px}
+.section h2{font-size:17px;margin:0 0 12px;color:#7bc9ff}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.actions button{min-height:55px}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:0 0 12px}
+.tabs button{white-space:nowrap;background:#17263d}.tabs button.active{background:#167bc2}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px}
+.item{background:#0c1626;border:2px solid var(--line);border-radius:13px;padding:10px;text-align:center;min-width:0}
+.item .keycap{margin:6px auto 4px;transform:perspective(500px) rotateX(9deg) scale(.7)}
+.item strong{display:block;font-size:12px}
+.item small{color:#91a8c5}
+.item button{margin-top:6px;width:100%;padding:8px}
+.tag{font-size:10px;background:#18314d;padding:4px 7px;border-radius:20px;display:inline-block;margin-top:4px}
+.locked{opacity:.35;filter:grayscale(1)}
+.note{color:#8da5c5;font-size:12px;line-height:1.6;margin:8px 0 0}
+.progress{height:9px;background:#26364d;border-radius:10px;overflow:hidden;margin-top:8px}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,#168fff,#8b63ff);width:0;transition:width .2s}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#203b5d;border:1px solid #438bc6;padding:12px 18px;border-radius:12px;display:none;z-index:30;box-shadow:0 5px 25px #0009;text-align:center}
+#reveal{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:20;text-align:center;cursor:pointer}
+#reveal .keycap{transform:perspective(500px) rotateX(9deg) scale(1.6);margin:30px 0;animation:pop .5s}
+@keyframes pop{from{transform:perspective(500px) scale(0) rotate(-30deg)}}
+#gold{position:fixed;display:none;z-index:15;font-size:34px;padding:10px 14px;animation:float 1s infinite}
+footer{text-align:center;color:#607b9e;padding:25px;font-size:11px}
+</style>
+</head>
+<body>
+<header><h1>⌨ KEY CAP CLICKER</h1><small>VERSION 3.0 • CRITS • COMBOS • REBIRTH</small></header>
+<div class="stats">
+ <div class="stat">🪙 Coins<b id="coins">0</b></div>
+ <div class="stat">💎 Gems<b id="gems">0</b></div>
+ <div class="stat">⚡ Per Click<b id="power">1</b></div>
+ <div class="stat">✖ Multiplier<b id="mult">1x</b></div>
+ <div class="stat">📦 Collection<b id="count">0/75</b></div>
+</div>
+<main>
+<div id="clickZone">
+ <div id="combo"></div>
+ <div id="mainCap"></div>
+ <h2 id="mainName"></h2>
+ <p>Tap fast to build a combo. Crits hit 5x!</p>
+</div>
+
+<div class="section">
+<h2>🎁 LUCKY BOXES</h2>
+<div class="actions">
+<button class="primary" onclick="openBox('Normal')">📦 Normal Box<br><small>100 coins</small></button>
+<button class="primary" onclick="openBox('Premium')">💠 Premium Box<br><small>8 gems</small></button>
+<button class="gold" onclick="openBox('Special')">🌟 Special Box<br><small>30 gems</small></button>
+<button onclick="dailyReward()">🎁 Daily Reward</button>
+</div>
+<p class="note">Every owned style adds +2% to all earnings. Equipped rank adds +25% per tier. Watch for the falling 💎!</p>
+</div>
+
+<div class="section">
+<h2>⚙ UPGRADES</h2>
+<div class="actions">
+<button onclick="upgradePower()">⚡ Upgrade Click<br><small id="powerCost"></small></button>
+<button onclick="upgradeAuto()">🤖 Auto Clicker<br><small id="autoCost"></small></button>
+<button onclick="upgradeCrit()">🎯 Crit Chance<br><small id="critCost"></small></button>
+<button class="gold" onclick="rebirth()">🔥 Rebirth<br><small id="rebCost"></small></button>
+</div>
+<p class="note">Auto: <span id="autoLevel">0</span>/sec • Crit: <span id="critPct">5</span>% • Rebirths: <span id="rebs">0</span> (+50% each)</p>
+</div>
+
+<div class="section">
+<h2>🏆 PLAYER LEVEL <span id="levelTxt"></span></h2>
+<div class="progress"><span id="xpbar"></span></div>
+</div>
+
+<div class="section">
+<h2>🗃 COLLECTION</h2>
+<div class="tabs">
+<button class="active" onclick="showTab('all',this)">All Styles</button>
+<button onclick="showTab('owned',this)">Owned</button>
+</div>
+<div id="collection" class="grid"></div>
+</div>
+
+<div class="section">
+<h2>🎒 INVENTORY</h2>
+<div id="inventory" class="grid"></div>
+</div>
+</main>
+<footer>KEY CAP CLICKER 3.0 • Saved automatically.</footer>
+<div id="toast"></div>
+<div id="reveal" onclick="this.style.display='none'"></div>
+<button id="gold" class="gold" onclick="grabGold(event)">💎</button>
+
+<script>
+const N="Classic,RGB Neon,Metallic,Cyber,Crystal,Artisan,Wooden,Ceramic,Gradient,Glow,Carbon Fiber,Retro,Holographic,Tactical,Marble,Acrylic,PBT Textured,ABS Shine,Pudding,Double-shot,Dye-sub,Low-profile,Sculpted,Ceramic Metallic,Lava,Ice,Steampunk,Military Camo,Topographic,Geometric,Pixel Art,Carbon Black,Galaxy,Toxic,Blood Moon,Ocean,Desert,Forest,Sakura,Thunder,Fire,Shadow,Ghost,Dragon,Skull,Venom,Plasma,Nuclear,Stealth,Samurai,Ninja,Ancient,Royal Gold,Diamond,Obsidian,Stealth Carbon,Frost,Aurora,Sunset,Storm,Galaxy Nebula,Meteor,Black Hole,Circuit,Hacker,Glitch,Digital,Biohazard,Cyberpunk,Neon Grid,Royal Purple,Golden Dragon,Dark Matter,Infinity,Godlike".split(",");
+const ranks=["Common","Rare","Epic","Legendary","Mythic","Cosmic","Infinite","Transcendent"];
+const rc=["#a5b0be","#42a9ff","#b16bff","#ffbf42","#ff5b83","#54e8ef","#ff8af2","#fff1a0"];
+const $=id=>document.getElementById(id);
+let save={coins:0,gems:10,power:1,auto:0,crit:5,xp:0,level:1,owned:[],equipped:0,lastDaily:0,rebirths:0};
+let tab="all",uid=1,combo=0,lastClick=0,ac=null;
+
+function load(){
+ try{const o=JSON.parse(localStorage.getItem("keycap3-save"));if(o)save={...save,...o}}catch(e){}
+ uid=Math.max(1,...save.owned.map(x=>x.uid+1));
+}
+function persist(){try{localStorage.setItem("keycap3-save",JSON.stringify(save))}catch(e){}}
+const num=n=>Math.floor(n).toLocaleString("en-US");
+function toast(t){const e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",1800)}
+function beep(f,d=.06){try{ac=ac||new AudioContext();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type="square";g.gain.value=.03;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+function cap(i,big,rank=0){
+ const h=(i*47)%360,sat=i===0?10:70;
+ return `<div class="keycap ${big?'big':''}" style="--cap:hsl(${h} ${sat}% 58%);--side:hsl(${h} ${sat-10}% 26%);--glow:${rc[rank]}">
+ <div class="base"></div><div class="top"></div><div class="legend">${i===74?"GOD":i===73?"∞":"KEY"}</div></div>`;
+}
+const eqItem=()=>save.owned.find(x=>x.uid===save.equipped);
+function mult(){
+ const u=new Set(save.owned.map(x=>x.style)).size,e=eqItem();
+ return (1+save.rebirths*.5)*(1+u*.02)*(1+(e?e.rank*.25:0));
+}
+function addXP(n){
+ save.xp+=n;
+ while(save.xp>=save.level*100){save.xp-=save.level*100;save.level++;save.gems+=2;toast("LEVEL UP! +2 💎");beep(880,.15)}
+}
+function cost(k){
+ return k==="p"?Math.floor(30*Math.pow(save.power,1.65)):k==="a"?Math.floor(100*Math.pow(save.auto+1,1.8)):Math.floor(500*Math.pow(save.crit/5,2.2));
+}
+function float(txt,x,y,crit){
+ const z=$("clickZone"),r=z.getBoundingClientRect(),d=document.createElement("div");
+ d.className="fl"+(crit?" crit":"");d.textContent=txt;
+ d.style.left=(x-r.left-15+Math.random()*30)+"px";d.style.top=(y-r.top-20)+"px";
+ z.appendChild(d);setTimeout(()=>d.remove(),900);
+}
+$("clickZone").addEventListener("click",e=>{
+ const now=Date.now();
+ combo=now-lastClick<600?Math.min(combo+1,50):1;lastClick=now;
+ const isCrit=Math.random()*100<save.crit;
+ let g=save.power*mult()*(1+combo*.05)*(isCrit?5:1);
+ save.coins+=g;addXP(Math.ceil(g/2));
+ float((isCrit?"CRIT! ":"+")+num(g),e.clientX||0,e.clientY||0,isCrit);
+ $("combo").textContent=combo>2?"🔥 COMBO x"+combo:"";
+ if(isCrit){$("clickZone").classList.remove("shake");void $("clickZone").offsetWidth;$("clickZone").classList.add("shake");beep(660,.1)}else beep(300+combo*8);
+ stats();
+});
+setInterval(()=>{if(Date.now()-lastClick>900&&combo){combo=0;$("combo").textContent=""}},300);
+
+function rollRank(box){
+ const w=box==="Normal"?[65,22,8,3,1.5,.4,.09,.01]:box==="Premium"?[35,28,18,10,5,2.8,.9,.3]:[15,23,22,16,11,7,4,2];
+ let r=Math.random()*w.reduce((a,b)=>a+b,0);
+ for(let i=0;i<w.length;i++){r-=w[i];if(r<=0)return i}
+ return 0;
+}
+function openBox(box){
+ const c={Normal:["coins",100],Premium:["gems",8],Special:["gems",30]}[box];
+ if(save[c[0]]<c[1]){toast("Not enough "+c[0]+"!");return}
+ save[c[0]]-=c[1];
+ const rank=rollRank(box),un=N.map((s,i)=>i).filter(i=>!save.owned.some(x=>x.style===i));
+ const style=un.length&&Math.random()<.75?un[Math.floor(Math.random()*un.length)]:Math.floor(Math.random()*N.length);
+ const it={uid:uid++,style,rank};save.owned.push(it);
+ const e=eqItem();if(!e||rank>=e.rank)save.equipped=it.uid;
+ const isNew=un.includes(style);
+ $("reveal").innerHTML=`<h2 style="color:${rc[rank]};margin:0">${ranks[rank].toUpperCase()}</h2>${cap(style,false,rank)}<h2 style="margin:0">${N[style]}</h2><p>${isNew?"✨ NEW STYLE! +2% earnings":"Duplicate"} • tap to close</p>`;
+ $("reveal").style.display="flex";beep(500+rank*120,.3);
+ persist();render();
+}
+function buy(k){
+ const c=cost(k);if(save.coins<c){toast("Not enough coins!");return false}
+ save.coins-=c;return true;
+}
+function upgradePower(){if(buy("p")){save.power++;toast("Click Power up!");render()}}
+function upgradeAuto(){if(buy("a")){save.auto++;toast("Auto Clicker up!");render()}}
+function upgradeCrit(){if(save.crit>=50){toast("Crit chance maxed!");return}if(buy("c")){save.crit+=2.5;toast("Crit chance up!");render()}}
+function rebirth(){
+ if(save.level<10){toast("Reach level 10 to rebirth");return}
+ if(!confirm("Rebirth resets coins, upgrades and level but keeps your keycaps. Gain +50% permanent bonus and 20 gems. Continue?"))return;
+ save.rebirths++;save.gems+=20;save.coins=0;save.power=1;save.auto=0;save.crit=5;save.level=1;save.xp=0;
+ toast("🔥 REBIRTH!");render();
+}
+function dailyReward(){
+ const n=new Date(),t=n.getFullYear()*10000+(n.getMonth()+1)*100+n.getDate();
+ if(save.lastDaily===t){toast("Already collected today!");return}
+ save.lastDaily=t;save.coins+=250;save.gems+=5;toast("+250 coins, +5 💎");render();
+}
+function equip(u){save.equipped=u;render();toast("Equipped!")}
+function sell(u){
+ const it=save.owned.find(x=>x.uid===u);if(!it||it.uid===save.equipped)return;
+ save.owned=save.owned.filter(x=>x.uid!==u);save.coins+=50*Math.pow(2,it.rank);render();toast("Sold!");
+}
+function showTab(t,b){tab=t;document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");render()}
+
+function render(){
+ const col=$("collection");col.innerHTML="";
+ const best={};save.owned.forEach(x=>{if(!best[x.style]||x.rank>best[x.style].rank)best[x.style]=x});
+ N.forEach((n,i)=>{
+  const o=best[i];if(tab==="owned"&&!o)return;
+  const d=document.createElement("div");d.className="item"+(o?"":" locked");
+  if(o)d.style.borderColor=rc[o.rank];
+  d.innerHTML=cap(i,false,o?o.rank:0)+`<strong>${o?n:"???"}</strong><span class="tag" style="color:${o?rc[o.rank]:"#9acfff"}">${o?ranks[o.rank]:"LOCKED"}</span>`;
+  col.appendChild(d);
+ });
+ const inv=$("inventory");inv.innerHTML="";
+ if(!save.owned.length)inv.innerHTML='<p class="note">Inventory empty. Open a box!</p>';
+ [...save.owned].sort((a,b)=>b.rank-a.rank).forEach(it=>{
+  const d=document.createElement("div");d.className="item";d.style.borderColor=rc[it.rank];
+  d.innerHTML=cap(it.style,false,it.rank)+`<strong>${N[it.style]}</strong><span class="tag" style="color:${rc[it.rank]}">${ranks[it.rank]}</span>`;
+  const e=document.createElement("button");e.textContent=it.uid===save.equipped?"EQUIPPED":"EQUIP";e.onclick=()=>equip(it.uid);d.appendChild(e);
+  if(it.uid!==save.equipped){const s=document.createElement("button");s.textContent="SELL +"+num(50*Math.pow(2,it.rank));s.onclick=()=>sell(it.uid);d.appendChild(s)}
+  inv.appendChild(d);
+ });
+ const e=eqItem(),st=e?e.style:0;
+ $("mainCap").innerHTML=cap(st,true,e?e.rank:0);
+ $("mainName").textContent=N[st].toUpperCase()+" KEYCAP"+(e?" • "+ranks[e.rank]:"");
+ stats();persist();
+}
+function stats(){
+ $("coins").textContent=num(save.coins);$("gems").textContent=num(save.gems);
+ $("power").textContent=num(save.power*mult());$("mult").textContent=mult().toFixed(2)+"x";
+ $("count").textContent=new Set(save.owned.map(x=>x.style)).size+"/75";
+ $("levelTxt").textContent="• Level "+save.level+" ("+save.xp+"/"+save.level*100+" XP)";
+ $("xpbar").style.width=(save.xp/(save.level*100)*100)+"%";
+ $("powerCost").textContent=num(cost("p"))+" coins";$("autoCost").textContent=num(cost("a"))+" coins";
+ $("critCost").textContent=save.crit>=50?"MAX":num(cost("c"))+" coins";
+ $("rebCost").textContent=save.level>=10?"Ready! +50% forever":"Needs level 10";
+ $("autoLevel").textContent=save.auto;$("critPct").textContent=save.crit;$("rebs").textContent=save.rebirths;
+}
+function spawnGold(){
+ const g=$("gold");g.style.left=(10+Math.random()*70)+"vw";g.style.top=(20+Math.random()*60)+"vh";g.style.display="block";
+ clearTimeout(spawnGold.t);spawnGold.t=setTimeout(()=>g.style.display="none",6000);
+}
+function grabGold(e){
+ e.stopPropagation();$("gold").style.display="none";
+ const n=1+Math.floor(Math.random()*3);save.gems+=n;toast("Caught a 💎! +"+n+" gems");beep(1000,.2);stats();
+}
+setInterval(spawnGold,25000+Math.random()*15000);
+load();render();
+setInterval(()=>{if(save.auto>0){const g=save.auto*save.power*mult();save.coins+=g;addXP(Math.ceil(g/4));stats()}},1000);
+setInterval(persist,5000);
+addEventListener("beforeunload",persist);
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(() => console.log("KEY CAP CLICKER: PWA Ready!"))
+      .catch(error => console.error("PWA Error:", error));
+  });
+}
+</script>
+
+</body>
+</html>
